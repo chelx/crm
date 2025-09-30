@@ -1,0 +1,33 @@
+---
+alwaysApply: true
+---
+
+## Chakra UI Rules
+
+### Theme & Design System
+
+- Centralize theme in `theme/`; extend Chakra theme with tokens (colors, space, radii, typography).
+- Define components theme overrides in `theme/components/`.
+- Use design tokens; avoid hardcoded values in components.
+
+### Components & Styling
+
+- Prefer Chakra components over raw HTML.
+- Use style props for simple cases; use `sx` or `styled` for complex variants.
+- Create reusable components for common patterns (buttons, form fields, modals).
+
+### Responsiveness
+
+- Use responsive style props (array/object syntax) for breakpoints.
+- Use `Stack`, `Grid`, and `Flex` for layout.
+
+### Accessibility
+
+- Use Chakra form components with labels and helper text.
+- Ensure contrast ratios meet WCAG AA.
+
+### Theming Practices
+
+- Use `variant`, `size`, and `colorScheme` instead of inline styles.
+- Avoid overriding Chakra CSS with `!important`.
+

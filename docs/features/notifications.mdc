@@ -1,0 +1,46 @@
+---
+title: Notifications
+---
+
+## Overview
+
+Notify users on key events (approvals, assignments, escalations).
+
+## Channels
+
+- In-app toasts/badges, email (optional), webhook (optional).
+
+## Triggers
+
+- Reply approved/rejected, feedback assigned, customer updated.
+
+## Requirements
+
+- Deduplicate notifications; user-level preferences.
+- Retry with backoff for external channels.
+- Audit notification deliveries (status, timestamp).
+
+### Data Model (Prisma sketch)
+
+```prisma
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String
+  payload    Json
+  status     String   @default("PENDING")
+  createdAt  DateTime @default(now())
+  deliveredAt DateTime?
+
+  @@index([userId, status])
+  @@map("notifications")
+}
+```
+
+### API samples
+
+```http
+GET /v1/notifications?status=UNREAD
+Authorization: Bearer <token>
+```
+

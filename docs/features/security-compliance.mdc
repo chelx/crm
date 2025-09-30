@@ -1,0 +1,39 @@
+---
+title: Security & Compliance
+---
+
+## Overview
+
+Ensure data protection for customer PII and secure operations.
+
+## Requirements
+
+- Encrypt PII at rest and in transit (TLS).
+- RBAC and least privilege for all access.
+- Input validation and sanitation; rate limiting.
+- Backups and tested restore procedures.
+- Anonymize data in lower environments.
+
+## Policies
+
+- Password policy; secure reset flows.
+- Token rotation for refresh tokens.
+- Audit and alerting for suspicious activities.
+
+### Data Points (for compliance)
+
+- Store only necessary PII fields; document data retention.
+- Encrypt-at-rest fields: email, phone (via field-level encryption service).
+- Redact PII in logs and expose masked values in non-privileged views.
+
+### API examples
+
+```http
+GET /v1/customers/cus_1
+Authorization: Bearer <csoAccessToken>
+```
+
+```json
+{ "id": "cus_1", "name": "John D.", "email": "j****@example.com" }
+```
+

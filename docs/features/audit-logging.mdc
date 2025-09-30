@@ -1,0 +1,57 @@
+---
+title: Audit Logging
+---
+
+## Overview
+
+Track critical actions for compliance and troubleshooting.
+
+## Scope
+
+- Auth events (login, logout, refresh, failures)
+- Data changes (create/update/delete) on customers, feedback, replies
+- Approval decisions (approve/reject) with reasons
+
+## Requirements
+
+- Immutable append-only store
+- Timestamps, actor id, resource type/id, action, metadata (non-PII)
+- Queryable by time, actor, resource, action
+
+## API (outline)
+
+- GET /v1/audits?filters
+
+### Data Model (Prisma sketch)
+
+```prisma
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String   @map("actor_id")
+  action     String   @map("action")
+  resource   String   @map("resource") // e.g., customer:cus_1
+  metadata   Json?    @map("metadata")  // non-PII context
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("audit_logs")
+  @@index([actorId, createdAt])
+  @@index([resource, createdAt])
+}
+```
+
+### API samples
+
+```http
+GET /v1/audits?actorId=u1&from=2025-01-01&to=2025-01-31&action=reply.approved
+Authorization: Bearer <managerAccessToken>
+```
+
+```json
+{
+  "data": [
+    { "id": "al_1", "actorId": "u2", "action": "reply.approved", "resource": "reply:rep_1", "createdAt": "2025-01-03T10:00:00Z" }
+  ],
+  "total": 1
+}
+```
+

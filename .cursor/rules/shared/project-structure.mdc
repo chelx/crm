@@ -1,0 +1,72 @@
+---
+alwaysApply: true
+---
+
+## Project Structure Rules
+
+### Overview
+
+- Single repository containing API (NestJS) and SPA (React + Refine + Chakra).
+- Optionally evolve to monorepo; keep boundaries clean from the start.
+
+### Backend (NestJS)
+
+- `apps/api/src/`
+  - `main.ts`, `app.module.ts`
+  - `modules/<feature>/`
+    - `<feature>.module.ts`, `<feature>.controller.ts`, `<feature>.service.ts`
+    - `dtos/`, `entities/`, `providers/`
+  - `core/` (global artifacts)
+    - `guards/`, `interceptors/`, `filters/`, `pipes/`, `middlewares/`
+  - `shared/`
+    - `utils/`, `adapters/`, `config/`
+  - `infra/`
+    - `prisma/`, `cache/`, `mail/`
+  - `common/`
+    - `constants/`, `decorators/`, `types/`
+  - `test/`
+    - `unit/`, `e2e/`
+- `prisma/`
+  - `schema.prisma`, `migrations/`, `seed.ts`
+
+### Frontend (React + Refine + Chakra)
+
+- `apps/web/src/`
+  - `app/`
+    - `providers/` (ChakraProvider, Refine providers)
+    - `routes.tsx`, `App.tsx`
+  - `features/<domain>/`
+    - `pages/`, `components/`, `hooks/`, `services/`, `adapters/`
+  - `components/ui/` (design system primitives)
+  - `theme/`
+    - `index.ts`, `components/`
+  - `libs/`
+    - `api/`, `auth/`, `storage/`
+  - `i18n/`, `assets/`, `tests/`
+
+### Naming & Boundaries
+
+- PascalCase for classes/components; camelCase for variables/functions; kebab-case for files/dirs.
+- Do not import between features directly; share via `shared/` or `libs/`.
+- UI primitives must not depend on feature code.
+
+### Env & Configuration
+
+- Separate `.env` per app/environment; validate with schema on startup.
+- Do not access `process.env` outside config modules/services.
+
+### Scripts & CI
+
+- Provide per-app scripts: `build`, `start`, `test`, `lint`, `format`.
+- Enforce pre-commit hooks for lint and format.
+- Store coverage outputs per app; cache dependencies in CI.
+
+### Path Aliases & Tooling Alignment
+
+- Use `tsconfig.base.json` to declare `@api/*`, `@web/*`, `@shared/*`.
+- Align aliases in bundlers and tooling:
+  - ESLint: `settings.import/resolver` to read TS paths.
+  - Jest/Vitest: map `moduleNameMapper` or `resolve.alias` accordingly.
+  - Webpack/Vite: set `resolve.alias` to TS paths.
+- Keep folder names in sync with aliases to avoid drift.
+

@@ -1,0 +1,103 @@
+---
+title: Customers Management
+---
+
+## Overview
+
+Manage customers securely: create, view, update, delete (as permitted).
+
+## Roles & Permissions
+
+- CSO: view customers, create/edit basic info, cannot delete.
+- Manager: full access including delete and merging duplicates.
+
+## User Stories
+
+- As a CSO, I can search and view customer profiles.
+- As a CSO, I can create and edit customer records with validation.
+- As a Manager, I can delete or merge duplicate customers.
+
+## Acceptance Criteria
+
+- Unique constraints: email and phone unique per tenant.
+- PII encrypted at rest; masked in logs and non-privileged views.
+- Audit every create/update/delete with `who/when/what`.
+
+## Data Model (high-level)
+
+- Customer(id, name, email, phone, address, tags, createdAt, updatedAt, deletedAt?)
+
+### Prisma sketch
+
+```prisma
+model Customer {
+  id          String   @id @default(cuid()) @map("id")
+  name        String   @map("name")
+  email       String   @unique @map("email")
+  phone       String?  @unique @map("phone")
+  address     String?  @map("address")
+  tags        String[] @map("tags")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  deletedAt   DateTime? @map("deleted_at")
+
+  @@map("customers")
+  @@index([name])
+  @@index([email])
+}
+```
+
+## API (outline)
+
+- GET /v1/customers (list, filters, pagination)
+- GET /v1/customers/:id (show)
+- POST /v1/customers (create)
+- PATCH /v1/customers/:id (update)
+- DELETE /v1/customers/:id (soft delete)
+
+### API samples
+
+```http
+GET /v1/customers?search=john&take=20&skip=0
+Authorization: Bearer <token>
+```
+
+```json
+{
+  "data": [
+    { "id": "cus_1", "name": "John Doe", "email": "john@example.com", "phone": "+1..." }
+  ],
+  "total": 128
+}
+```
+
+```http
+POST /v1/customers
+Content-Type: application/json
+Authorization: Bearer <token>
+```
+
+```json
+{
+  "name": "Jane Smith",
+  "email": "jane@example.com",
+  "phone": "+1...",
+  "address": "...",
+  "tags": ["vip", "newsletter"]
+}
+```
+
+```json
+{
+  "id": "cus_2",
+  "name": "Jane Smith",
+  "email": "jane@example.com"
+}
+```
+
+## UI (outline)
+
+- List with filters (name/email/phone/tags), pagination.
+- Create/Edit form with validation.
+- Detail page with recent feedback.
+

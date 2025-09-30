@@ -1,0 +1,105 @@
+---
+title: Feedback Management
+---
+
+## Overview
+
+Collect and manage customer feedback linked to customers.
+
+## Roles & Permissions
+
+- CSO: view and draft replies; submit for approval.
+- Manager: review all feedback, approve/reject replies.
+
+## User Stories
+
+- As a CSO, I can log new feedback for a customer.
+- As a CSO, I can draft a reply and submit for approval.
+- As a Manager, I can review replies and provide decision/comments.
+
+## Acceptance Criteria
+
+- Feedback belongs to a customer; immutable original message.
+- Reply status lifecycle: Draft → Submitted → Approved/Rejected.
+- Audit trail for status transitions and comments.
+
+## Data Model (high-level)
+
+- Feedback(id, customerId, message, channel, createdAt)
+- Reply(id, feedbackId, content, status, submittedBy, reviewedBy?, reviewedAt?)
+
+### Prisma sketch
+
+```prisma
+enum ReplyStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  REJECTED
+}
+
+model Feedback {
+  id         String   @id @default(cuid())
+  customerId String
+  message    String
+  channel    String
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  replies  Reply[]
+
+  @@index([customerId])
+  @@map("feedback")
+}
+
+model Reply {
+  id          String      @id @default(cuid())
+  feedbackId  String
+  content     String
+  status      ReplyStatus @default(DRAFT)
+  submittedBy String
+  reviewedBy  String?
+  reviewedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  feedback Feedback @relation(fields: [feedbackId], references: [id], onDelete: Cascade)
+
+  @@index([feedbackId])
+  @@map("replies")
+}
+```
+
+## API (outline)
+
+- GET /v1/feedback (list/filter)
+- POST /v1/feedback (create)
+- POST /v1/feedback/:id/replies (draft/submit)
+- POST /v1/replies/:id/approve | /reject
+
+## UI (outline)
+
+### API samples
+
+```http
+POST /v1/feedback
+Content-Type: application/json
+```
+
+```json
+{ "customerId": "cus_1", "message": "I need help with...", "channel": "email" }
+```
+
+```http
+POST /v1/feedback/fb_1/replies
+Content-Type: application/json
+```
+
+```json
+{ "content": "Thanks for reaching out...", "status": "SUBMITTED" }
+```
+
+
+- Feedback inbox with filters (status, channel, date).
+- Feedback detail with reply composer and approval status.
+

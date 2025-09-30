@@ -1,0 +1,92 @@
+---
+title: Authentication & Roles
+---
+
+## Overview
+
+Provide secure authentication and role-based access control.
+
+## Roles
+
+- CSO: handle customers and feedback, no approvals.
+- Manager: all CSO permissions plus reply approvals and user management.
+
+## Requirements
+
+- JWT access (15–30m) + refresh tokens (7–30d), rotation, revocation.
+- Password policy (>= 8 chars, mixed case, number, symbol), bcrypt >= 12.
+- RBAC via roles and resource-level checks.
+
+## Data Model (Prisma sketch)
+
+```prisma
+enum UserRole {
+  CSO
+  MANAGER
+}
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  password   String
+  role       UserRole
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  rotatedAt DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("refresh_tokens")
+  @@index([userId])
+}
+```
+
+## API samples
+
+```http
+POST /v1/auth/login
+Content-Type: application/json
+```
+
+```json
+{ "email": "cso@example.com", "password": "Str0ngP@ss!" }
+```
+
+```json
+{
+  "accessToken": "...",
+  "refreshToken": "...",
+  "user": { "id": "u1", "email": "cso@example.com", "role": "CSO" }
+}
+```
+
+```http
+POST /v1/auth/refresh
+Authorization: Bearer <refreshToken>
+```
+
+```json
+{ "accessToken": "..." }
+```
+
+## Flows
+
+- Login/refresh/logout.
+- Role check on every protected route.
+- Permission checks on resource ownership when needed.
+
+## UI
+
+- Login page, forgot password, reset flow.
+- Guarded routes and menu visibility by role.
+

@@ -1,0 +1,53 @@
+---
+alwaysApply: true
+---
+
+## Frontend Rules (React + Refine + Chakra UI)
+
+### Architecture & Project Structure
+
+- Use feature-first folder structure under `src/` (domain-oriented).
+- Group pages, components, hooks, and services per feature.
+- Keep UI primitives separate from feature components.
+- Prefer composition over inheritance; keep components small and focused.
+
+### TypeScript & Coding Standards
+
+- Enable strict TypeScript; avoid `any`.
+- Define explicit prop types and function return types.
+- Use enums and discriminated unions for finite states.
+- Prefer readonly props and immutable data updates.
+
+### Data Fetching & State
+
+- Use Refine data providers for CRUD; avoid ad-hoc fetches.
+- Use React Query (via Refine) for server state and caching.
+- Keep global app state minimal; prefer local state and query cache.
+- Normalize server responses in adapters before reaching UI.
+
+### Routing & Layout
+
+- Use Refine router bindings; define routes per feature.
+- Centralize layout with Chakra UI components; keep page-level layout minimal.
+
+### Accessibility & i18n
+
+- Use accessible Chakra components; ensure proper ARIA usage.
+- Provide i18n-ready copy; avoid hardcoded strings in components.
+
+### Performance
+
+- Lazy-load routes and heavy components.
+- Memoize expensive components and selectors; use `React.memo`, `useMemo`, `useCallback` judiciously.
+- Virtualize large lists.
+
+### Error Handling & UX
+
+- Standardize loading/empty/error UI with shared components.
+- Surface actionable error messages; avoid leaking internals.
+
+### Security
+
+- Never trust client input; validate before sending to API.
+- Sanitize any user-generated HTML; avoid `dangerouslySetInnerHTML`.
+

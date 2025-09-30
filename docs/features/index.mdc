@@ -1,0 +1,21 @@
+---
+title: CRM Features Index
+---
+
+# CRM Features
+
+This document lists all CRM features and links to detailed specs.
+
+- Customers Management → `customers`
+- Authentication & Roles → `auth-roles`
+- Feedback Management → `feedback-management`
+- Reply Approval Workflow → `reply-approval`
+- Audit Logging → `audit-logging`
+- Security & Compliance → `security-compliance`
+- Notifications → `notifications`
+- Reporting & Dashboards → `reporting-dashboards`
+- Search & Filtering → `search-filtering`
+- Settings & Configuration → `settings-configuration`
+
+See each feature spec in this folder for user stories, acceptance criteria, data model, APIs, UI, and permissions.
+

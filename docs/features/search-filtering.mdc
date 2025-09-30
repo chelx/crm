@@ -1,0 +1,24 @@
+---
+title: Search & Filtering
+---
+
+## Overview
+
+Allow users to quickly find customers and feedback.
+
+## Requirements
+
+- Text search on name/email/phone/message (indexed fields).
+- Faceted filters: status, tags, channel, date range.
+- Pagination and sort; preserve query in URL.
+
+### API samples
+
+```http
+GET /v1/customers?search=smith&tags=vip&take=20&cursor=...
+```
+
+```http
+GET /v1/feedback?status=SUBMITTED&channel=email&from=2025-01-01&to=2025-01-31
+```
+

@@ -1,0 +1,30 @@
+---
+alwaysApply: true
+---
+
+## Hooks Rules (React + Refine)
+
+### Custom Hooks
+
+- Prefix with `use`; return a stable API (objects/tuples documented).
+- Keep single responsibility; less than 20 logical steps.
+- Accept/return typed objects (RO-RO pattern) to reduce params.
+
+### Data Hooks with Refine
+
+- Use Refine hooks (`useList`, `useShow`, `useCreate`, `useUpdate`, `useDelete`) for CRUD.
+- Co-locate hooks with feature folders; abstract resource names and map domain terms.
+- Normalize data in hooks; avoid leaking transport layer details to components.
+
+### React Query Practices
+
+- Use stable `queryKey`s; scope by resource and filters.
+- Set sane `staleTime`/`cacheTime` per resource.
+- Use mutations with optimistic updates when safe; rollback on error.
+- Handle loading/error states centrally.
+
+### Performance & Stability
+
+- Memoize callbacks and derived values.
+- Avoid creating new objects in dependency arrays.
+

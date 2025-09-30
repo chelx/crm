@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+---
+
+## State Management Rules
+
+### Server State (Preferred)
+
+- Use Refine (React Query) for server state fetching, caching, and syncing.
+- Derive UI directly from queries; avoid duplicating in local/global state.
+
+### Client State
+
+- Keep client state minimal and local to components when possible.
+- Use Context for cross-cutting state (theme, auth session, layout) sparingly.
+
+### Forms
+
+- Use `react-hook-form` with Chakra components.
+- Validate with Zod/Yup; keep schemas next to forms.
+- Use controlled inputs and field-level validation where needed.
+
+### Error & Loading State
+
+- Centralize patterns for loading, empty, and error UI.
+- Use toast/snackbar for transient errors; dialogs for destructive confirmations.
+

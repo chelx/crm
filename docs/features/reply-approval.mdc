@@ -1,0 +1,57 @@
+---
+title: Reply Approval Workflow
+---
+
+## Overview
+
+Manager reviews and approves/rejects CSO replies before sending to customers.
+
+## Workflow
+
+- Draft → Submitted → Approved/Rejected → (Optional) Published to customer.
+- Rejection must include reviewer comment.
+
+## Roles & Permissions
+
+- CSO: create draft, submit for approval, edit draft after rejection.
+- Manager: approve/reject, add comments, publish if required.
+
+## Acceptance Criteria
+
+- Only Manager can transition from Submitted to Approved/Rejected.
+- All transitions audited with user, timestamp, and reason.
+- Notifications sent to the submitter on decision.
+
+## API (outline)
+
+- POST /v1/replies/:id/submit
+- POST /v1/replies/:id/approve
+- POST /v1/replies/:id/reject
+
+### API samples
+
+```http
+POST /v1/replies/rep_1/approve
+Content-Type: application/json
+Authorization: Bearer <managerAccessToken>
+```
+
+```json
+{ "comment": "Looks good. Approved." }
+```
+
+```http
+POST /v1/replies/rep_1/reject
+Content-Type: application/json
+Authorization: Bearer <managerAccessToken>
+```
+
+```json
+{ "comment": "Needs a more empathetic tone." }
+```
+
+## UI (outline)
+
+- Approval queue for Managers with filters.
+- Reply detail: timeline of decisions and comments.
+

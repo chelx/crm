@@ -1,0 +1,32 @@
+---
+alwaysApply: true
+---
+
+## Frontend Testing Rules (React)
+
+### Testing Stack
+
+- Use Vitest or Jest with React Testing Library.
+- Use MSW to mock network requests in tests.
+
+### Principles
+
+- Test behavior, not implementation details.
+- Arrange-Act-Assert structure; clear naming.
+- Keep tests deterministic; mock timers and random.
+
+### Component Tests
+
+- Render components with providers (Chakra theme, Refine context) via custom render helper.
+- Test accessibility (roles, labels) and user flows with `user-event`.
+- Avoid asserting internal state; assert DOM and side effects.
+
+### Hooks Tests
+
+- Test hooks with `renderHook`; mock Refine data hooks where needed.
+- Cover loading, success, and error states.
+
+### E2E Pointer
+
+- Use Playwright or Cypress for E2E; mock backend where feasible.
+

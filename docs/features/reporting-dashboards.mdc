@@ -1,0 +1,35 @@
+---
+title: Reporting & Dashboards
+---
+
+## Overview
+
+Provide basic analytics for workload and outcomes.
+
+## KPIs
+
+- Feedback volume by status/channel/time
+- Average approval time, reply turnaround
+- CSO workload and SLA adherence
+
+## Requirements
+
+- Filter by date range, role, channel.
+- Export CSV for selected reports.
+
+### Data Sources
+
+- Derived from operational tables (feedback, replies, audit_logs).
+- Consider materialized views for heavy aggregations.
+
+### API samples
+
+```http
+GET /v1/reports/feedback-volume?from=2025-01-01&to=2025-01-31&groupBy=day
+Authorization: Bearer <managerAccessToken>
+```
+
+```json
+{ "series": [{ "date": "2025-01-01", "count": 12 }] }
+```
+

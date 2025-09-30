@@ -1,0 +1,42 @@
+---
+alwaysApply: true
+---
+
+## React Components Rules
+
+### Component Architecture
+
+- Prefer function components with hooks.
+- Keep components pure; avoid side effects in render.
+- Split container vs presentational when complexity grows.
+- Keep props minimal and explicit; avoid deep prop drilling (use context selectively).
+
+### Naming & Files
+
+- One component per file, default export; file name matches component name in kebab-case.
+- Use PascalCase for component names; suffix with role only when needed (e.g., `UserList`).
+
+### Props & State
+
+- Define `Props` and `State` types; avoid `any`.
+- Use controlled components for form elements.
+- Derive UI from state; avoid duplicating server state and local state.
+
+### Side Effects
+
+- Use `useEffect` for side effects with explicit dependencies.
+- Cleanup subscriptions/timeouts in effects.
+
+### Lists & Keys
+
+- Use stable ids for keys; avoid array index except static lists.
+
+### Error/Loading/Empty
+
+- Standardize UI with shared components; do not repeat spinners/placeholders.
+
+### Accessibility
+
+- Prefer semantic HTML and accessible Chakra components.
+- Ensure focus management and keyboard navigation.
+

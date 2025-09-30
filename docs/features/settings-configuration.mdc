@@ -1,0 +1,50 @@
+---
+title: Settings & Configuration
+---
+
+## Overview
+
+Admin-manageable settings for the CRM.
+
+## Areas
+
+- User management (invite, disable), roles assignment.
+- Notification preferences (per user/team).
+- Lookup values (channels, tags).
+- Security options (password rules, session).
+
+## Requirements
+
+- Audit changes to settings.
+- Validate inputs; restrict to Manager/admin.
+
+### Data Model (Prisma sketch)
+
+```prisma
+model Setting {
+  key        String   @id
+  value      Json
+  updatedBy  String
+  updatedAt  DateTime @updatedAt
+
+  @@map("settings")
+}
+```
+
+### API samples
+
+```http
+GET /v1/settings
+Authorization: Bearer <managerAccessToken>
+```
+
+```http
+PUT /v1/settings/passwordPolicy
+Content-Type: application/json
+Authorization: Bearer <managerAccessToken>
+```
+
+```json
+{ "minLength": 10, "requireSymbol": true }
+```
+
