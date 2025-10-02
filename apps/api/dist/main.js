@@ -10,7 +10,7 @@ async function bootstrap() {
     const configService = app.get(config_1.ConfigService);
     const apiPrefix = configService.get('API_PREFIX', 'v1');
     app.setGlobalPrefix(apiPrefix);
-    const corsOrigin = configService.get('CORS_ORIGIN', 'http://localhost:3001');
+    const corsOrigin = configService.get('CORS_ORIGIN', 'http://localhost:3000');
     app.enableCors({
         origin: corsOrigin,
         credentials: true,
@@ -32,7 +32,7 @@ async function bootstrap() {
         .build();
     const document = swagger_1.SwaggerModule.createDocument(app, config);
     swagger_1.SwaggerModule.setup(swaggerPath, app, document);
-    const port = configService.get('PORT', 3000);
+    const port = configService.get('PORT', 3001);
     await app.listen(port);
     console.log(`🚀 Application is running on: http://localhost:${port}`);
     console.log(`📚 Swagger documentation: http://localhost:${port}/${swaggerPath}`);
