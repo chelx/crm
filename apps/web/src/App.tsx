@@ -10,7 +10,12 @@ import theme from '@/theme';
 function App() {
   return (
     <ChakraProvider theme={RefineThemes.Blue}>
-      <BrowserRouter>
+      <BrowserRouter
+        future={{
+          v7_startTransition: true,
+          v7_relativeSplatPath: true,
+        }}
+      >
         <Refine
           dataProvider={dataProvider}
           authProvider={authProvider}

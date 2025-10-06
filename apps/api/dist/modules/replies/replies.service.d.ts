@@ -1,29 +1,33 @@
 import { PrismaService } from '@/infra/prisma/prisma.service';
+import { AuditService } from '@/modules/audit/audit.service';
+import { NotificationService } from '@/modules/notifications/notification.service';
 import { CreateReplyDto, UpdateReplyDto, SubmitReplyDto, ApproveReplyDto, RejectReplyDto, ReplyQueryDto } from './dtos/reply.dto';
 import { UserRole } from '@prisma/client';
 export declare class RepliesService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private audit;
+    private notification;
+    constructor(prisma: PrismaService, audit: AuditService, notification: NotificationService);
     create(createReplyDto: CreateReplyDto, userId: string): Promise<{
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -35,22 +39,22 @@ export declare class RepliesService {
             feedback: {
                 customer: {
                     id: string;
-                    email: string;
                     name: string;
+                    email: string;
                 };
             } & {
                 id: string;
                 createdAt: Date;
-                customerId: string;
                 message: string;
                 channel: string;
+                customerId: string;
             };
         } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            content: string;
             status: import(".prisma/client").$Enums.ReplyStatus;
+            content: string;
             submittedBy: string;
             reviewedBy: string | null;
             reviewedAt: Date | null;
@@ -68,23 +72,23 @@ export declare class RepliesService {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
                 phone: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -95,22 +99,22 @@ export declare class RepliesService {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -121,22 +125,22 @@ export declare class RepliesService {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -147,22 +151,22 @@ export declare class RepliesService {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -173,22 +177,22 @@ export declare class RepliesService {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -199,22 +203,22 @@ export declare class RepliesService {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;

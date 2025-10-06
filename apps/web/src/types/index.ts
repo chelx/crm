@@ -1,7 +1,9 @@
+export type UserRole = 'CSO' | 'MANAGER';
+
 export interface User {
   id: string;
   email: string;
-  role: 'CSO' | 'MANAGER';
+  role: UserRole;
   createdAt: string;
   updatedAt: string;
 }
@@ -21,22 +23,22 @@ export interface Feedback {
   id: string;
   customerId: string;
   message: string;
-  channel: 'email' | 'phone' | 'chat' | 'social';
-  status: 'new' | 'in_progress' | 'resolved' | 'closed';
+  channel: string;
   createdAt: string;
-  updatedAt: string;
   customer?: Customer;
+  replies?: Reply[];
 }
+
+export type ReplyStatus = 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
 
 export interface Reply {
   id: string;
   feedbackId: string;
   content: string;
-  status: 'DRAFT' | 'SUBMITTED' | 'APPROVED' | 'REJECTED';
+  status: ReplyStatus;
   submittedBy: string;
   reviewedBy?: string;
   reviewedAt?: string;
-  comment?: string;
   createdAt: string;
   updatedAt: string;
   feedback?: Feedback;
@@ -47,8 +49,14 @@ export interface AuditLog {
   actorId: string;
   action: string;
   resource: string;
-  metadata: Record<string, any>;
+  metadata?: any;
   createdAt: string;
+  updatedAt: string;
+  actor?: {
+    id: string;
+    email: string;
+    role: UserRole;
+  };
 }
 
 export interface LoginCredentials {

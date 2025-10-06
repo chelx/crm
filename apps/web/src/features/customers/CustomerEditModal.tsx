@@ -1,0 +1,238 @@
+import { useState, useEffect } from 'react';
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  FormControl,
+  FormLabel,
+  Input,
+  Textarea,
+  VStack,
+  HStack,
+  Tag,
+  TagLabel,
+  TagCloseButton,
+  InputGroup,
+  InputRightElement,
+  useToast,
+  Text,
+} from '@chakra-ui/react';
+import { FiPlus } from 'react-icons/fi';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useUpdate } from '@refinedev/core';
+import { Customer } from '@/types';
+
+const updateCustomerSchema = z.object({
+  name: z.string().min(1, 'Name is required').max(255, 'Name too long'),
+  email: z.string().email('Invalid email address'),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+});
+
+type UpdateCustomerForm = z.infer<typeof updateCustomerSchema>;
+
+interface CustomerEditModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  customer: Customer | null;
+  onSuccess: () => void;
+}
+
+export const CustomerEditModal = ({ isOpen, onClose, customer, onSuccess }: CustomerEditModalProps) => {
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState('');
+  const toast = useToast();
+  const { mutate: updateCustomer, isLoading } = useUpdate();
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm<UpdateCustomerForm>({
+    resolver: zodResolver(updateCustomerSchema),
+  });
+
+  useEffect(() => {
+    if (customer) {
+      reset({
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone || '',
+        address: customer.address || '',
+      });
+      setTags(customer.tags || []);
+    }
+  }, [customer, reset]);
+
+  const addTag = () => {
+    if (tagInput.trim() && !tags.includes(tagInput.trim())) {
+      setTags([...tags, tagInput.trim()]);
+      setTagInput('');
+    }
+  };
+
+  const removeTag = (tagToRemove: string) => {
+    setTags(tags.filter(tag => tag !== tagToRemove));
+  };
+
+  const onSubmit = (data: UpdateCustomerForm) => {
+    if (!customer) return;
+
+    updateCustomer({
+      resource: 'customers',
+      id: customer.id,
+      values: {
+        ...data,
+        tags,
+      },
+    }, {
+      onSuccess: () => {
+        toast({
+          title: 'Customer updated',
+          description: 'Customer has been updated successfully.',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+        });
+        onSuccess();
+      },
+      onError: (error: any) => {
+        toast({
+          title: 'Error',
+          description: error?.message || 'Failed to update customer.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
+      },
+    });
+  };
+
+  const handleClose = () => {
+    setTagInput('');
+    onClose();
+  };
+
+  if (!customer) return null;
+
+  return (
+    <Modal isOpen={isOpen} onClose={handleClose} size="lg">
+      <ModalOverlay />
+      <ModalContent>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <ModalHeader>Edit Customer</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <VStack spacing={4}>
+              <FormControl isInvalid={!!errors.name}>
+                <FormLabel>Name *</FormLabel>
+                <Input
+                  placeholder="Enter customer name"
+                  {...register('name')}
+                />
+                {errors.name && (
+                  <Text color="red.500" fontSize="sm" mt={1}>
+                    {errors.name.message}
+                  </Text>
+                )}
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.email}>
+                <FormLabel>Email *</FormLabel>
+                <Input
+                  type="email"
+                  placeholder="Enter email address"
+                  {...register('email')}
+                />
+                {errors.email && (
+                  <Text color="red.500" fontSize="sm" mt={1}>
+                    {errors.email.message}
+                  </Text>
+                )}
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.phone}>
+                <FormLabel>Phone</FormLabel>
+                <Input
+                  placeholder="Enter phone number"
+                  {...register('phone')}
+                />
+                {errors.phone && (
+                  <Text color="red.500" fontSize="sm" mt={1}>
+                    {errors.phone.message}
+                  </Text>
+                )}
+              </FormControl>
+
+              <FormControl isInvalid={!!errors.address}>
+                <FormLabel>Address</FormLabel>
+                <Textarea
+                  placeholder="Enter address"
+                  rows={3}
+                  {...register('address')}
+                />
+                {errors.address && (
+                  <Text color="red.500" fontSize="sm" mt={1}>
+                    {errors.address.message}
+                  </Text>
+                )}
+              </FormControl>
+
+              <FormControl>
+                <FormLabel>Tags</FormLabel>
+                <InputGroup>
+                  <Input
+                    placeholder="Add a tag"
+                    value={tagInput}
+                    onChange={(e) => setTagInput(e.target.value)}
+                    onKeyUp={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addTag();
+                      }
+                    }}
+                  />
+                  <InputRightElement>
+                    <Button size="sm" onClick={addTag}>
+                      <FiPlus />
+                    </Button>
+                  </InputRightElement>
+                </InputGroup>
+                <HStack spacing={2} mt={2} flexWrap="wrap">
+                  {tags.map((tag) => (
+                    <Tag key={tag} colorScheme="blue">
+                      <TagLabel>{tag}</TagLabel>
+                      <TagCloseButton onClick={() => removeTag(tag)} />
+                    </Tag>
+                  ))}
+                </HStack>
+              </FormControl>
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button variant="ghost" mr={3} onClick={handleClose}>
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              colorScheme="blue"
+              isLoading={isLoading}
+              loadingText="Updating..."
+            >
+              Update Customer
+            </Button>
+          </ModalFooter>
+        </form>
+      </ModalContent>
+    </Modal>
+  );
+};

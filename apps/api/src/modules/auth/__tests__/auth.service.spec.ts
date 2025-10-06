@@ -1,10 +1,12 @@
 // @ts-nocheck
 import 'jest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthService } from '../../src/modules/auth/auth.service';
-import { PrismaService } from '../../src/infra/prisma/prisma.service';
+import { AuthService } from '../auth.service';
+import { PrismaService } from '../../../infra/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { AuditService } from '../../audit/audit.service';
+import { BruteForceDetectionService } from '../../security/brute-force-detection.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -48,11 +50,17 @@ describe('AuthService', () => {
           provide: ConfigService,
           useValue: mockConfigService,
         },
+        { provide: AuditService, useValue: { log: jest.fn(), logAnonymous: jest.fn() } },
+        { provide: BruteForceDetectionService, useValue: { isBlocked: jest.fn().mockResolvedValue(false), recordLoginAttempt: jest.fn() } },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
     prismaService = module.get<PrismaService>(PrismaService);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
   });
 
   it('should be defined', () => {
@@ -69,8 +77,6 @@ describe('AuthService', () => {
       };
 
       mockPrismaService.user.findUnique.mockResolvedValue(mockUser);
-      
-      // Mock verifyPassword method directly
       jest.spyOn(service as any, 'verifyPassword').mockResolvedValue(true);
 
       const result = await service.validateUser('test@example.com', 'password');
@@ -91,3 +97,5 @@ describe('AuthService', () => {
     });
   });
 });
+
+

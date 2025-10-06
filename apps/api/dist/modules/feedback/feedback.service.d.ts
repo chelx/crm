@@ -1,12 +1,14 @@
 import { PrismaService } from '@/infra/prisma/prisma.service';
 import { CreateFeedbackDto, FeedbackQueryDto } from './dtos/feedback.dto';
+import { AuditService } from '@/modules/audit/audit.service';
 export declare class FeedbackService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private audit;
+    constructor(prisma: PrismaService, audit: AuditService);
     create(createFeedbackDto: CreateFeedbackDto, userId: string): Promise<{
         customer: {
-            name: string;
             id: string;
+            name: string;
             email: string;
         };
         replies: {
@@ -31,8 +33,8 @@ export declare class FeedbackService {
     findAll(queryDto: FeedbackQueryDto): Promise<{
         data: ({
             customer: {
-                name: string;
                 id: string;
+                name: string;
                 email: string;
             };
             replies: {
@@ -56,8 +58,8 @@ export declare class FeedbackService {
     }>;
     findOne(id: string): Promise<{
         customer: {
-            name: string;
             id: string;
+            name: string;
             email: string;
             phone: string;
         };

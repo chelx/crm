@@ -6,8 +6,8 @@ export declare class FeedbackController {
     constructor(feedbackService: FeedbackService);
     create(createFeedbackDto: CreateFeedbackDto, user: User): Promise<{
         customer: {
-            name: string;
             id: string;
+            name: string;
             email: string;
         };
         replies: {
@@ -32,8 +32,8 @@ export declare class FeedbackController {
     findAll(queryDto: FeedbackQueryDto): Promise<{
         data: ({
             customer: {
-                name: string;
                 id: string;
+                name: string;
                 email: string;
             };
             replies: {
@@ -62,8 +62,8 @@ export declare class FeedbackController {
     }>;
     findOne(id: string): Promise<{
         customer: {
-            name: string;
             id: string;
+            name: string;
             email: string;
             phone: string;
         };

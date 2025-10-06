@@ -30,8 +30,9 @@ axiosInstance.interceptors.response.use(
           const response = await axios.post(`${API_URL}/auth/refresh`, {
             refreshToken,
           });
-          const { accessToken } = response.data.data;
+          const { accessToken, refreshToken: newRefreshToken } = response.data.data;
           localStorage.setItem('accessToken', accessToken);
+          localStorage.setItem('refreshToken', newRefreshToken);
           error.config.headers.Authorization = `Bearer ${accessToken}`;
           return axiosInstance(error.config);
         } catch (refreshError) {
@@ -72,20 +73,26 @@ export const dataProvider: DataProvider = {
 
     const { data } = await axiosInstance.get(`${url}?${queryParams}`);
 
+    // Handle API response structure: { success: true, data: { data: [...], meta: {...} } }
+    const responseData = data.data || data;
+    
     return {
-      data: data.data || data,
-      total: data.total || (Array.isArray(data.data) ? data.data.length : 0),
+      data: responseData.data || responseData,
+      total: responseData.meta?.total || (Array.isArray(responseData.data) ? responseData.data.length : 0),
     };
   },
 
-  getOne: async ({ resource, id }) => {
-    const url = `/${resource}/${id}`;
-    const { data } = await axiosInstance.get(url);
+      getOne: async ({ resource, id }) => {
+        const url = `/${resource}/${id}`;
+        const { data } = await axiosInstance.get(url);
 
-    return {
-      data: data.data || data,
-    };
-  },
+        // Handle API response structure: { success: true, data: {...} }
+        const responseData = data.data || data;
+        
+        return {
+          data: responseData,
+        };
+      },
 
   create: async ({ resource, variables }) => {
     const url = `/${resource}`;
@@ -119,24 +126,36 @@ export const dataProvider: DataProvider = {
   },
 
   custom: async ({ url, method, filters, sorters, payload, query, headers }) => {
-    let requestUrl = `${url}?`;
+    const params = new URLSearchParams();
 
     if (sorters && sorters.length > 0) {
       const sorter = sorters[0];
-      requestUrl += `_sort=${sorter.field}:${sorter.order}`;
+      params.append('_sort', `${sorter.field}:${sorter.order}`);
     }
 
     if (filters) {
       filters.forEach((filter) => {
-        if ('field' in filter && filter.field && 'value' in filter && filter.value) {
-          requestUrl += `&${filter.field}=${filter.value}`;
+        if ('field' in filter && filter.field && 'value' in filter && filter.value !== undefined && filter.value !== null) {
+          params.append(String(filter.field), String(filter.value));
         }
       });
     }
 
     if (query) {
-      requestUrl += `&${query}`;
+      if (typeof query === 'string') {
+        // Accept pre-encoded string
+        const q = new URLSearchParams(query);
+        q.forEach((v, k) => params.append(k, v));
+      } else if (typeof query === 'object') {
+        Object.entries(query).forEach(([k, v]) => {
+          if (v !== undefined && v !== null && v !== '') {
+            params.append(k, String(v));
+          }
+        });
+      }
     }
+
+    const requestUrl = params.toString() ? `${url}?${params.toString()}` : url;
 
     const { data } = await axiosInstance({
       url: requestUrl,
@@ -145,6 +164,11 @@ export const dataProvider: DataProvider = {
       headers: headers,
     });
 
-    return Promise.resolve({ data });
+    // Handle API response structure for custom requests
+    const responseData = data.data || data;
+    
+    return {
+      data: responseData.data || responseData,
+    };
   },
 };

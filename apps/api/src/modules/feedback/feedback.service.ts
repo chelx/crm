@@ -1,10 +1,11 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '@/infra/prisma/prisma.service';
 import { CreateFeedbackDto, FeedbackQueryDto } from './dtos/feedback.dto';
+import { AuditService } from '@/modules/audit/audit.service';
 
 @Injectable()
 export class FeedbackService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService) {}
 
   async create(createFeedbackDto: CreateFeedbackDto, userId: string) {
     // Verify customer exists
@@ -37,6 +38,17 @@ export class FeedbackService {
           orderBy: { createdAt: 'desc' },
           take: 1,
         },
+      },
+    });
+
+    // Audit: feedback.created
+    await this.audit.log({
+      actorId: userId,
+      action: 'feedback.created',
+      resource: `feedback:${feedback.id}`,
+      metadata: { 
+        customerId: createFeedbackDto.customerId,
+        channel: createFeedbackDto.channel 
       },
     });
 

@@ -1,30 +1,34 @@
 import { PrismaService } from '@/infra/prisma/prisma.service';
 import { CreateCustomerDto, UpdateCustomerDto, CustomerQueryDto } from './dtos/customer.dto';
 import { UserRole } from '@prisma/client';
+import { AuditService } from '@/modules/audit/audit.service';
+import { NotificationService } from '@/modules/notifications/notification.service';
 export declare class CustomersService {
     private prisma;
-    constructor(prisma: PrismaService);
+    private audit;
+    private notification;
+    constructor(prisma: PrismaService, audit: AuditService, notification: NotificationService);
     create(createCustomerDto: CreateCustomerDto, userId: string): Promise<{
-        name: string;
-        tags: string[];
         id: string;
+        name: string;
         email: string;
-        createdAt: Date;
-        updatedAt: Date;
         phone: string | null;
         address: string | null;
+        tags: string[];
+        createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
     }>;
     findAll(queryDto: CustomerQueryDto): Promise<{
         data: {
-            name: string;
-            tags: string[];
             id: string;
+            name: string;
             email: string;
-            createdAt: Date;
-            updatedAt: Date;
             phone: string | null;
             address: string | null;
+            tags: string[];
+            createdAt: Date;
+            updatedAt: Date;
             deletedAt: Date | null;
         }[];
         meta: {
@@ -35,39 +39,39 @@ export declare class CustomersService {
         };
     }>;
     findOne(id: string): Promise<{
-        name: string;
-        tags: string[];
         id: string;
+        name: string;
         email: string;
-        createdAt: Date;
-        updatedAt: Date;
         phone: string | null;
         address: string | null;
-        deletedAt: Date | null;
-    }>;
-    update(id: string, updateCustomerDto: UpdateCustomerDto, userRole: UserRole): Promise<{
-        name: string;
         tags: string[];
-        id: string;
-        email: string;
         createdAt: Date;
         updatedAt: Date;
-        phone: string | null;
-        address: string | null;
         deletedAt: Date | null;
     }>;
-    remove(id: string, userRole: UserRole): Promise<{
-        name: string;
-        tags: string[];
+    update(id: string, updateCustomerDto: UpdateCustomerDto, userRole: UserRole, userId: string): Promise<{
         id: string;
+        name: string;
         email: string;
+        phone: string | null;
+        address: string | null;
+        tags: string[];
         createdAt: Date;
         updatedAt: Date;
-        phone: string | null;
-        address: string | null;
         deletedAt: Date | null;
     }>;
-    merge(sourceId: string, targetId: string, userRole: UserRole): Promise<{
+    remove(id: string, userRole: UserRole, userId: string): Promise<{
+        id: string;
+        name: string;
+        email: string;
+        phone: string | null;
+        address: string | null;
+        tags: string[];
+        createdAt: Date;
+        updatedAt: Date;
+        deletedAt: Date | null;
+    }>;
+    merge(sourceId: string, targetId: string, userRole: UserRole, userId: string): Promise<{
         message: string;
         sourceCustomer: string;
         targetCustomer: string;

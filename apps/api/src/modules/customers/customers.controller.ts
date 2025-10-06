@@ -75,7 +75,7 @@ export class CustomersController {
     @Body() updateCustomerDto: UpdateCustomerDto,
     @CurrentUser() user: User,
   ) {
-    return this.customersService.update(id, updateCustomerDto, user.role);
+    return this.customersService.update(id, updateCustomerDto, user.role, user.id);
   }
 
   @Delete(':id')
@@ -87,7 +87,7 @@ export class CustomersController {
   @ApiResponse({ status: 403, description: 'Only managers can delete customers' })
   @ApiResponse({ status: 404, description: 'Customer not found' })
   async remove(@Param('id') id: string, @CurrentUser() user: User) {
-    return this.customersService.remove(id, user.role);
+    return this.customersService.remove(id, user.role, user.id);
   }
 
   @Post(':sourceId/merge/:targetId')
@@ -105,6 +105,6 @@ export class CustomersController {
     @Param('targetId') targetId: string,
     @CurrentUser() user: User,
   ) {
-    return this.customersService.merge(sourceId, targetId, user.role);
+    return this.customersService.merge(sourceId, targetId, user.role, user.id);
   }
 }

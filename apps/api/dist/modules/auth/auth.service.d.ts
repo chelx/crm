@@ -1,26 +1,30 @@
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '@/infra/prisma/prisma.service';
+import { AuditService } from '@/modules/audit/audit.service';
+import { BruteForceDetectionService } from '@/modules/security/brute-force-detection.service';
 import { LoginDto, RegisterDto, RefreshTokenDto } from './dtos/auth.dto';
 import { LoginResponse, RefreshTokenResponse } from '@/shared/types/auth.types';
 export declare class AuthService {
     private prisma;
     private jwtService;
     private configService;
-    constructor(prisma: PrismaService, jwtService: JwtService, configService: ConfigService);
+    private audit;
+    private bruteForceDetection;
+    constructor(prisma: PrismaService, jwtService: JwtService, configService: ConfigService, audit: AuditService, bruteForceDetection: BruteForceDetectionService);
     validateUser(email: string, password: string): Promise<{
         id: string;
+        createdAt: Date;
         email: string;
         role: import(".prisma/client").$Enums.UserRole;
-        createdAt: Date;
         updatedAt: Date;
     }>;
-    login(loginDto: LoginDto): Promise<LoginResponse>;
+    login(loginDto: LoginDto, clientIp?: string): Promise<LoginResponse>;
     register(registerDto: RegisterDto): Promise<{
         id: string;
+        createdAt: Date;
         email: string;
         role: import(".prisma/client").$Enums.UserRole;
-        createdAt: Date;
         updatedAt: Date;
     }>;
     refreshToken(refreshTokenDto: RefreshTokenDto): Promise<RefreshTokenResponse>;

@@ -12,12 +12,12 @@ export declare class AuditController {
                 role: import(".prisma/client").$Enums.UserRole;
             };
         } & {
-            actorId: string;
+            id: string;
             action: string;
             resource: string;
-            id: string;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
             createdAt: Date;
+            actorId: string;
         })[];
         meta: {
             total: number;
@@ -32,12 +32,12 @@ export declare class AuditController {
         topActions: Record<string, number>;
     }>;
     getMyActivity(user: User, days?: number): Promise<{
-        actorId: string;
+        id: string;
         action: string;
         resource: string;
-        id: string;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
         createdAt: Date;
+        actorId: string;
     }[]>;
     getResourceHistory(resource: string): Promise<({
         actor: {
@@ -46,12 +46,12 @@ export declare class AuditController {
             role: import(".prisma/client").$Enums.UserRole;
         };
     } & {
-        actorId: string;
+        id: string;
         action: string;
         resource: string;
-        id: string;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
         createdAt: Date;
+        actorId: string;
     })[]>;
     findOne(id: string): Promise<{
         actor: {
@@ -60,11 +60,11 @@ export declare class AuditController {
             role: import(".prisma/client").$Enums.UserRole;
         };
     } & {
-        actorId: string;
+        id: string;
         action: string;
         resource: string;
-        id: string;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
         createdAt: Date;
+        actorId: string;
     }>;
 }

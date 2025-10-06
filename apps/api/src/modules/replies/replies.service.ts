@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '@/infra/prisma/prisma.service';
+import { AuditService } from '@/modules/audit/audit.service';
+import { NotificationService } from '@/modules/notifications/notification.service';
 import { 
   CreateReplyDto, 
   UpdateReplyDto, 
@@ -12,7 +14,11 @@ import { UserRole, ReplyStatus } from '@prisma/client';
 
 @Injectable()
 export class RepliesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService, 
+    private audit: AuditService,
+    private notification: NotificationService,
+  ) {}
 
   async create(createReplyDto: CreateReplyDto, userId: string) {
     // Verify feedback exists
@@ -44,6 +50,14 @@ export class RepliesService {
           },
         },
       },
+    });
+
+    // Audit: reply.created
+    await this.audit.log({
+      actorId: userId,
+      action: 'reply.created',
+      resource: `reply:${reply.id}`,
+      metadata: { feedbackId: createReplyDto.feedbackId },
     });
 
     return reply;
@@ -154,6 +168,13 @@ export class RepliesService {
       },
     });
 
+    // Audit: reply.updated
+    await this.audit.log({
+      actorId: userId,
+      action: 'reply.updated',
+      resource: `reply:${id}`,
+    });
+
     return updatedReply;
   }
 
@@ -186,6 +207,13 @@ export class RepliesService {
           },
         },
       },
+    });
+
+    // Audit: reply.submitted
+    await this.audit.log({
+      actorId: userId,
+      action: 'reply.submitted',
+      resource: `reply:${id}`,
     });
 
     return updatedReply;
@@ -225,6 +253,21 @@ export class RepliesService {
       },
     });
 
+    // Audit: reply.approved
+    await this.audit.log({
+      actorId: userId,
+      action: 'reply.approved',
+      resource: `reply:${id}`,
+      metadata: { comment: approveReplyDto.comment },
+    });
+
+    // Notify submitter that reply was approved
+    await this.notification.notifyReplyApproved(
+      updatedReply.submittedBy,
+      updatedReply.id,
+      updatedReply.feedback.customer?.name || 'Customer',
+    );
+
     return updatedReply;
   }
 
@@ -261,6 +304,22 @@ export class RepliesService {
         },
       },
     });
+
+    // Audit: reply.rejected
+    await this.audit.log({
+      actorId: userId,
+      action: 'reply.rejected',
+      resource: `reply:${id}`,
+      metadata: { comment: rejectReplyDto.comment },
+    });
+
+    // Notify submitter that reply was rejected
+    await this.notification.notifyReplyRejected(
+      updatedReply.submittedBy,
+      updatedReply.id,
+      updatedReply.feedback.customer?.name || 'Customer',
+      rejectReplyDto.comment,
+    );
 
     return updatedReply;
   }

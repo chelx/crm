@@ -8,22 +8,22 @@ export declare class RepliesController {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -35,22 +35,22 @@ export declare class RepliesController {
             feedback: {
                 customer: {
                     id: string;
-                    email: string;
                     name: string;
+                    email: string;
                 };
             } & {
                 id: string;
                 createdAt: Date;
-                customerId: string;
                 message: string;
                 channel: string;
+                customerId: string;
             };
         } & {
             id: string;
             createdAt: Date;
             updatedAt: Date;
-            content: string;
             status: import(".prisma/client").$Enums.ReplyStatus;
+            content: string;
             submittedBy: string;
             reviewedBy: string | null;
             reviewedAt: Date | null;
@@ -68,22 +68,22 @@ export declare class RepliesController {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -99,23 +99,23 @@ export declare class RepliesController {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
                 phone: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -126,22 +126,22 @@ export declare class RepliesController {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -152,22 +152,22 @@ export declare class RepliesController {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -178,22 +178,22 @@ export declare class RepliesController {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;
@@ -204,22 +204,22 @@ export declare class RepliesController {
         feedback: {
             customer: {
                 id: string;
-                email: string;
                 name: string;
+                email: string;
             };
         } & {
             id: string;
             createdAt: Date;
-            customerId: string;
             message: string;
             channel: string;
+            customerId: string;
         };
     } & {
         id: string;
         createdAt: Date;
         updatedAt: Date;
-        content: string;
         status: import(".prisma/client").$Enums.ReplyStatus;
+        content: string;
         submittedBy: string;
         reviewedBy: string | null;
         reviewedAt: Date | null;

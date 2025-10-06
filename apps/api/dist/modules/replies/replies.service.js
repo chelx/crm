@@ -12,10 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RepliesService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../infra/prisma/prisma.service");
+const audit_service_1 = require("../audit/audit.service");
+const notification_service_1 = require("../notifications/notification.service");
 const client_1 = require("@prisma/client");
 let RepliesService = class RepliesService {
-    constructor(prisma) {
+    constructor(prisma, audit, notification) {
         this.prisma = prisma;
+        this.audit = audit;
+        this.notification = notification;
     }
     async create(createReplyDto, userId) {
         const feedback = await this.prisma.feedback.findUnique({
@@ -44,6 +48,12 @@ let RepliesService = class RepliesService {
                     },
                 },
             },
+        });
+        await this.audit.log({
+            actorId: userId,
+            action: 'reply.created',
+            resource: `reply:${reply.id}`,
+            metadata: { feedbackId: createReplyDto.feedbackId },
         });
         return reply;
     }
@@ -137,6 +147,11 @@ let RepliesService = class RepliesService {
                 },
             },
         });
+        await this.audit.log({
+            actorId: userId,
+            action: 'reply.updated',
+            resource: `reply:${id}`,
+        });
         return updatedReply;
     }
     async submit(id, submitReplyDto, userId) {
@@ -165,6 +180,11 @@ let RepliesService = class RepliesService {
                     },
                 },
             },
+        });
+        await this.audit.log({
+            actorId: userId,
+            action: 'reply.submitted',
+            resource: `reply:${id}`,
         });
         return updatedReply;
     }
@@ -198,6 +218,13 @@ let RepliesService = class RepliesService {
                 },
             },
         });
+        await this.audit.log({
+            actorId: userId,
+            action: 'reply.approved',
+            resource: `reply:${id}`,
+            metadata: { comment: approveReplyDto.comment },
+        });
+        await this.notification.notifyReplyApproved(updatedReply.submittedBy, updatedReply.id, updatedReply.feedback.customer?.name || 'Customer');
         return updatedReply;
     }
     async reject(id, rejectReplyDto, userId, userRole) {
@@ -230,6 +257,13 @@ let RepliesService = class RepliesService {
                 },
             },
         });
+        await this.audit.log({
+            actorId: userId,
+            action: 'reply.rejected',
+            resource: `reply:${id}`,
+            metadata: { comment: rejectReplyDto.comment },
+        });
+        await this.notification.notifyReplyRejected(updatedReply.submittedBy, updatedReply.id, updatedReply.feedback.customer?.name || 'Customer', rejectReplyDto.comment);
         return updatedReply;
     }
     async getApprovalQueue(userRole) {
@@ -288,6 +322,8 @@ let RepliesService = class RepliesService {
 exports.RepliesService = RepliesService;
 exports.RepliesService = RepliesService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        audit_service_1.AuditService,
+        notification_service_1.NotificationService])
 ], RepliesService);
 //# sourceMappingURL=replies.service.js.map

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ValidationPipe } from '@nestjs/common';
 import { InfraModule } from '@/infra/infra.module';
 import { AppController } from './app.controller';
@@ -11,6 +12,8 @@ import { CustomersModule } from '@/modules/customers/customers.module';
 import { FeedbackModule } from '@/modules/feedback/feedback.module';
 import { RepliesModule } from '@/modules/replies/replies.module';
 import { AuditModule } from '@/modules/audit/audit.module';
+import { ReportsModule } from '@/modules/reports/reports.module';
+import { SecurityModule } from '@/modules/security/security.module';
 import { GlobalExceptionFilter } from '@/core/filters/global-exception.filter';
 import { LoggingInterceptor } from '@/core/interceptors/logging.interceptor';
 import { ResponseInterceptor } from '@/core/interceptors/response.interceptor';
@@ -21,6 +24,7 @@ import { ResponseInterceptor } from '@/core/interceptors/response.interceptor';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    ScheduleModule.forRoot(),
     ThrottlerModule.forRoot([
       {
         ttl: 60000, // 1 minute
@@ -33,6 +37,8 @@ import { ResponseInterceptor } from '@/core/interceptors/response.interceptor';
     FeedbackModule,
     RepliesModule,
     AuditModule,
+    ReportsModule,
+    SecurityModule,
   ],
   controllers: [AppController],
   providers: [

@@ -13,6 +13,14 @@ module.exports = {
     'src/**/*.(t|j)s',
   ],
   coverageDirectory: 'coverage',
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      lines: 85,
+      functions: 80,
+      statements: 85,
+    },
+  },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@/core/(.*)$': '<rootDir>/src/core/$1',

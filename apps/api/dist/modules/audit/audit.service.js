@@ -33,6 +33,21 @@ let AuditService = AuditService_1 = class AuditService {
             this.logger.error('Failed to create audit log', error);
         }
     }
+    async logAnonymous(action, resource, metadata) {
+        try {
+            await this.prisma.auditLog.create({
+                data: {
+                    actorId: 'anonymous',
+                    action,
+                    resource,
+                    metadata: metadata || {},
+                },
+            });
+        }
+        catch (error) {
+            this.logger.error('Failed to create anonymous audit log', error);
+        }
+    }
     async findAll(queryDto) {
         const { actorId, action, resource, from, to, page = 1, limit = 20 } = queryDto;
         const skip = (page - 1) * limit;

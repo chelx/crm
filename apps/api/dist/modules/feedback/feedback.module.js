@@ -11,12 +11,13 @@ const common_1 = require("@nestjs/common");
 const feedback_controller_1 = require("./feedback.controller");
 const feedback_service_1 = require("./feedback.service");
 const infra_module_1 = require("../../infra/infra.module");
+const audit_module_1 = require("../audit/audit.module");
 let FeedbackModule = class FeedbackModule {
 };
 exports.FeedbackModule = FeedbackModule;
 exports.FeedbackModule = FeedbackModule = __decorate([
     (0, common_1.Module)({
-        imports: [infra_module_1.InfraModule],
+        imports: [infra_module_1.InfraModule, audit_module_1.AuditModule],
         controllers: [feedback_controller_1.FeedbackController],
         providers: [feedback_service_1.FeedbackService],
         exports: [feedback_service_1.FeedbackService],

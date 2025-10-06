@@ -11,6 +11,7 @@ const common_1 = require("@nestjs/common");
 const core_1 = require("@nestjs/core");
 const config_1 = require("@nestjs/config");
 const throttler_1 = require("@nestjs/throttler");
+const schedule_1 = require("@nestjs/schedule");
 const common_2 = require("@nestjs/common");
 const infra_module_1 = require("./infra/infra.module");
 const app_controller_1 = require("./app.controller");
@@ -20,6 +21,8 @@ const customers_module_1 = require("./modules/customers/customers.module");
 const feedback_module_1 = require("./modules/feedback/feedback.module");
 const replies_module_1 = require("./modules/replies/replies.module");
 const audit_module_1 = require("./modules/audit/audit.module");
+const reports_module_1 = require("./modules/reports/reports.module");
+const security_module_1 = require("./modules/security/security.module");
 const global_exception_filter_1 = require("./core/filters/global-exception.filter");
 const logging_interceptor_1 = require("./core/interceptors/logging.interceptor");
 const response_interceptor_1 = require("./core/interceptors/response.interceptor");
@@ -33,6 +36,7 @@ exports.AppModule = AppModule = __decorate([
                 isGlobal: true,
                 envFilePath: '.env',
             }),
+            schedule_1.ScheduleModule.forRoot(),
             throttler_1.ThrottlerModule.forRoot([
                 {
                     ttl: 60000,
@@ -45,6 +49,8 @@ exports.AppModule = AppModule = __decorate([
             feedback_module_1.FeedbackModule,
             replies_module_1.RepliesModule,
             audit_module_1.AuditModule,
+            reports_module_1.ReportsModule,
+            security_module_1.SecurityModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [

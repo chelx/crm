@@ -11,12 +11,14 @@ const common_1 = require("@nestjs/common");
 const replies_controller_1 = require("./replies.controller");
 const replies_service_1 = require("./replies.service");
 const infra_module_1 = require("../../infra/infra.module");
+const audit_module_1 = require("../audit/audit.module");
+const notification_module_1 = require("../notifications/notification.module");
 let RepliesModule = class RepliesModule {
 };
 exports.RepliesModule = RepliesModule;
 exports.RepliesModule = RepliesModule = __decorate([
     (0, common_1.Module)({
-        imports: [infra_module_1.InfraModule],
+        imports: [infra_module_1.InfraModule, audit_module_1.AuditModule, notification_module_1.NotificationModule],
         controllers: [replies_controller_1.RepliesController],
         providers: [replies_service_1.RepliesService],
         exports: [replies_service_1.RepliesService],

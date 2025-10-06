@@ -11,6 +11,7 @@ export declare class AuditService {
     private readonly logger;
     constructor(prisma: PrismaService);
     log(auditData: AuditLogData): Promise<void>;
+    logAnonymous(action: string, resource: string, metadata?: any): Promise<void>;
     findAll(queryDto: AuditQueryDto): Promise<{
         data: ({
             actor: {
@@ -20,10 +21,10 @@ export declare class AuditService {
             };
         } & {
             id: string;
-            createdAt: Date;
             action: string;
             resource: string;
             metadata: import("@prisma/client/runtime/library").JsonValue | null;
+            createdAt: Date;
             actorId: string;
         })[];
         meta: {
@@ -41,10 +42,10 @@ export declare class AuditService {
         };
     } & {
         id: string;
-        createdAt: Date;
         action: string;
         resource: string;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        createdAt: Date;
         actorId: string;
     }>;
     getAuditStats(): Promise<{
@@ -54,10 +55,10 @@ export declare class AuditService {
     }>;
     getUserActivity(userId: string, days?: number): Promise<{
         id: string;
-        createdAt: Date;
         action: string;
         resource: string;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        createdAt: Date;
         actorId: string;
     }[]>;
     getResourceHistory(resource: string): Promise<({
@@ -68,10 +69,10 @@ export declare class AuditService {
         };
     } & {
         id: string;
-        createdAt: Date;
         action: string;
         resource: string;
         metadata: import("@prisma/client/runtime/library").JsonValue | null;
+        createdAt: Date;
         actorId: string;
     })[]>;
 }

@@ -23,8 +23,9 @@ let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
     }
-    async login(loginDto) {
-        return this.authService.login(loginDto);
+    async login(loginDto, req) {
+        const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+        return this.authService.login(loginDto, clientIp);
     }
     async register(registerDto) {
         return this.authService.register(registerDto);
@@ -44,9 +45,11 @@ __decorate([
     (0, swagger_1.ApiOperation)({ summary: 'User login' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Login successful' }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Invalid credentials' }),
+    (0, swagger_1.ApiResponse)({ status: 429, description: 'Too many failed attempts' }),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Req)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [auth_dto_1.LoginDto]),
+    __metadata("design:paramtypes", [auth_dto_1.LoginDto, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "login", null);
 __decorate([

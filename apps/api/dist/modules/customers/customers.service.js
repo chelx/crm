@@ -12,9 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomersService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../infra/prisma/prisma.service");
+const audit_service_1 = require("../audit/audit.service");
+const notification_service_1 = require("../notifications/notification.service");
 let CustomersService = class CustomersService {
-    constructor(prisma) {
+    constructor(prisma, audit, notification) {
         this.prisma = prisma;
+        this.audit = audit;
+        this.notification = notification;
     }
     async create(createCustomerDto, userId) {
         const existingCustomer = await this.prisma.customer.findUnique({
@@ -36,6 +40,12 @@ let CustomersService = class CustomersService {
                 ...createCustomerDto,
                 tags: createCustomerDto.tags || [],
             },
+        });
+        await this.audit.log({
+            actorId: userId,
+            action: 'customer.created',
+            resource: `customer:${customer.id}`,
+            metadata: { email: customer.email, name: customer.name },
         });
         return customer;
     }
@@ -87,7 +97,7 @@ let CustomersService = class CustomersService {
         }
         return customer;
     }
-    async update(id, updateCustomerDto, userRole) {
+    async update(id, updateCustomerDto, userRole, userId) {
         const customer = await this.findOne(id);
         if (updateCustomerDto.email && updateCustomerDto.email !== customer.email) {
             const existingCustomer = await this.prisma.customer.findUnique({
@@ -109,9 +119,17 @@ let CustomersService = class CustomersService {
             where: { id },
             data: updateCustomerDto,
         });
+        await this.audit.log({
+            actorId: userId,
+            action: 'customer.updated',
+            resource: `customer:${id}`,
+            metadata: { changes: updateCustomerDto },
+        });
+        const managers = await this.prisma.user.findMany({ where: { role: 'MANAGER' } });
+        await Promise.all(managers.map((m) => this.notification.notifyCustomerUpdated(m.id, id, updatedCustomer.name)));
         return updatedCustomer;
     }
-    async remove(id, userRole) {
+    async remove(id, userRole, userId) {
         const customer = await this.findOne(id);
         if (userRole !== 'MANAGER') {
             throw new common_1.ForbiddenException('Only managers can delete customers');
@@ -122,9 +140,15 @@ let CustomersService = class CustomersService {
                 deletedAt: new Date(),
             },
         });
+        await this.audit.log({
+            actorId: userId,
+            action: 'customer.deleted',
+            resource: `customer:${id}`,
+            metadata: { name: customer.name, email: customer.email },
+        });
         return deletedCustomer;
     }
-    async merge(sourceId, targetId, userRole) {
+    async merge(sourceId, targetId, userRole, userId) {
         if (userRole !== 'MANAGER') {
             throw new common_1.ForbiddenException('Only managers can merge customers');
         }
@@ -141,6 +165,16 @@ let CustomersService = class CustomersService {
             where: { id: sourceId },
             data: { deletedAt: new Date() },
         });
+        await this.audit.log({
+            actorId: userId,
+            action: 'customer.merged',
+            resource: `customer:${sourceId}`,
+            metadata: {
+                sourceCustomer: sourceCustomer.name,
+                targetCustomer: targetCustomer.name,
+                targetId: targetId
+            },
+        });
         return {
             message: 'Customers merged successfully',
             sourceCustomer: sourceCustomer.name,
@@ -151,6 +185,6 @@ let CustomersService = class CustomersService {
 exports.CustomersService = CustomersService;
 exports.CustomersService = CustomersService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService, notification_service_1.NotificationService])
 ], CustomersService);
 //# sourceMappingURL=customers.service.js.map

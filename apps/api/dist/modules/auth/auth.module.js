@@ -17,6 +17,8 @@ const jwt_strategy_1 = require("./strategies/jwt.strategy");
 const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
 const roles_guard_1 = require("../../core/guards/roles.guard");
 const infra_module_1 = require("../../infra/infra.module");
+const audit_module_1 = require("../audit/audit.module");
+const security_module_1 = require("../security/security.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
@@ -24,6 +26,8 @@ exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [
             infra_module_1.InfraModule,
+            audit_module_1.AuditModule,
+            security_module_1.SecurityModule,
             passport_1.PassportModule,
             jwt_1.JwtModule.registerAsync({
                 imports: [config_1.ConfigModule],

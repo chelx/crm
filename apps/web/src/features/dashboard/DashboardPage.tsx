@@ -8,15 +8,20 @@ import {
   Heading,
   Text,
   Stat,
-  StatLabel,
   StatNumber,
   StatHelpText,
   StatArrow,
   VStack,
   HStack,
   Icon,
+  Flex,
+  Spinner,
+  Alert,
+  AlertIcon,
 } from '@chakra-ui/react';
 import { FiUsers, FiMessageSquare, FiCheckCircle, FiActivity } from 'react-icons/fi';
+import { useCustom } from '@refinedev/core';
+import { useNavigate } from 'react-router-dom';
 
 const StatCard = ({ title, value, change, icon, color }: any) => (
   <Card>
@@ -41,6 +46,36 @@ const StatCard = ({ title, value, change, icon, color }: any) => (
 );
 
 export const DashboardPage = () => {
+  const navigate = useNavigate();
+  const feedbackVolume = useCustom<{ series: { date: string; count: number }[] }>({
+    url: '/reports/feedback-volume',
+    method: 'get',
+    config: { query: { groupBy: 'day' } },
+  });
+
+  const repliesMetrics = useCustom<{ avgApprovalHours: number; avgReplyHours: number; totalApproved: number; totalReplies: number }>({
+    url: '/reports/replies-metrics',
+    method: 'get',
+  });
+
+  const workload = useCustom<Array<{ userId: string; email: string; role: string; totalReplies: number }>>({
+    url: '/reports/workload',
+    method: 'get',
+  });
+
+  const audits = useCustom<{ data: Array<{ id: string; action: string; resource: string; createdAt: string }> }>({
+    url: '/audits',
+    method: 'get',
+    config: { query: { page: 1, limit: 5 } },
+  });
+
+  const totalFeedback = (feedbackVolume.data?.data?.series || []).reduce((s, x) => s + x.count, 0);
+  const totalApproved = repliesMetrics.data?.data?.totalApproved || 0;
+  const totalReplies = repliesMetrics.data?.data?.totalReplies || 0;
+  const activeUsers = workload.data?.data?.length || 0;
+
+  const loading = feedbackVolume.isLoading || repliesMetrics.isLoading || workload.isLoading;
+
   return (
     <Box>
       <VStack spacing={6} align="stretch">
@@ -57,8 +92,8 @@ export const DashboardPage = () => {
           <GridItem>
             <StatCard
               title="Total Customers"
-              value="1,234"
-              change={12}
+              value={activeUsers}
+              change={0}
               icon={FiUsers}
               color="blue.500"
             />
@@ -66,8 +101,8 @@ export const DashboardPage = () => {
           <GridItem>
             <StatCard
               title="New Feedback"
-              value="89"
-              change={-5}
+              value={totalFeedback}
+              change={0}
               icon={FiMessageSquare}
               color="green.500"
             />
@@ -75,8 +110,8 @@ export const DashboardPage = () => {
           <GridItem>
             <StatCard
               title="Resolved Issues"
-              value="456"
-              change={8}
+              value={totalApproved}
+              change={0}
               icon={FiCheckCircle}
               color="purple.500"
             />
@@ -84,8 +119,8 @@ export const DashboardPage = () => {
           <GridItem>
             <StatCard
               title="Active Users"
-              value="23"
-              change={15}
+              value={activeUsers}
+              change={0}
               icon={FiActivity}
               color="orange.500"
             />
@@ -99,32 +134,24 @@ export const DashboardPage = () => {
                 <Heading size="md">Recent Activity</Heading>
               </CardHeader>
               <CardBody>
-                <VStack spacing={3} align="stretch">
-                  <Box p={3} bg="gray.50" borderRadius="md">
-                    <Text fontSize="sm" fontWeight="medium">
-                      New customer registered
-                    </Text>
-                    <Text fontSize="xs" color="gray.600">
-                      2 minutes ago
-                    </Text>
-                  </Box>
-                  <Box p={3} bg="gray.50" borderRadius="md">
-                    <Text fontSize="sm" fontWeight="medium">
-                      Feedback received from John Doe
-                    </Text>
-                    <Text fontSize="xs" color="gray.600">
-                      15 minutes ago
-                    </Text>
-                  </Box>
-                  <Box p={3} bg="gray.50" borderRadius="md">
-                    <Text fontSize="sm" fontWeight="medium">
-                      Reply approved by Manager
-                    </Text>
-                    <Text fontSize="xs" color="gray.600">
-                      1 hour ago
-                    </Text>
-                  </Box>
-                </VStack>
+                {audits.isLoading ? (
+                  <Flex justify="center" py={6}><Spinner /></Flex>
+                ) : audits.data?.data?.data?.length ? (
+                  <VStack spacing={3} align="stretch">
+                    {audits.data.data.data.map((log) => (
+                      <Box key={log.id} p={3} bg="gray.50" borderRadius="md">
+                        <Text fontSize="sm" fontWeight="medium">
+                          {log.action.replace('.', ' ')}
+                        </Text>
+                        <Text fontSize="xs" color="gray.600">
+                          {new Date(log.createdAt).toLocaleString()} • {log.resource}
+                        </Text>
+                      </Box>
+                    ))}
+                  </VStack>
+                ) : (
+                  <Alert status="info"><AlertIcon />No recent activity</Alert>
+                )}
               </CardBody>
             </Card>
           </GridItem>
@@ -136,7 +163,7 @@ export const DashboardPage = () => {
               </CardHeader>
               <CardBody>
                 <VStack spacing={3} align="stretch">
-                  <Box p={3} bg="blue.50" borderRadius="md" cursor="pointer" _hover={{ bg: 'blue.100' }}>
+                  <Box p={3} bg="blue.50" borderRadius="md" cursor="pointer" _hover={{ bg: 'blue.100' }} onClick={() => navigate('/customers')} role="button">
                     <Text fontSize="sm" fontWeight="medium" color="blue.700">
                       View All Customers
                     </Text>
@@ -144,7 +171,7 @@ export const DashboardPage = () => {
                       Manage customer information
                     </Text>
                   </Box>
-                  <Box p={3} bg="green.50" borderRadius="md" cursor="pointer" _hover={{ bg: 'green.100' }}>
+                  <Box p={3} bg="green.50" borderRadius="md" cursor="pointer" _hover={{ bg: 'green.100' }} onClick={() => navigate('/replies')} role="button">
                     <Text fontSize="sm" fontWeight="medium" color="green.700">
                       Review Pending Replies
                     </Text>
@@ -152,7 +179,7 @@ export const DashboardPage = () => {
                       Approve or reject replies
                     </Text>
                   </Box>
-                  <Box p={3} bg="purple.50" borderRadius="md" cursor="pointer" _hover={{ bg: 'purple.100' }}>
+                  <Box p={3} bg="purple.50" borderRadius="md" cursor="pointer" _hover={{ bg: 'purple.100' }} onClick={() => navigate('/audit')} role="button">
                     <Text fontSize="sm" fontWeight="medium" color="purple.700">
                       View Audit Logs
                     </Text>

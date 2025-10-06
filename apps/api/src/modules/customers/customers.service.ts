@@ -2,10 +2,12 @@ import { Injectable, NotFoundException, ConflictException, ForbiddenException } 
 import { PrismaService } from '@/infra/prisma/prisma.service';
 import { CreateCustomerDto, UpdateCustomerDto, CustomerQueryDto } from './dtos/customer.dto';
 import { UserRole } from '@prisma/client';
+import { AuditService } from '@/modules/audit/audit.service';
+import { NotificationService } from '@/modules/notifications/notification.service';
 
 @Injectable()
 export class CustomersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private audit: AuditService, private notification: NotificationService) {}
 
   async create(createCustomerDto: CreateCustomerDto, userId: string) {
     // Check for existing email
@@ -33,6 +35,14 @@ export class CustomersService {
         ...createCustomerDto,
         tags: createCustomerDto.tags || [],
       },
+    });
+
+    // Audit: customer.created
+    await this.audit.log({
+      actorId: userId,
+      action: 'customer.created',
+      resource: `customer:${customer.id}`,
+      metadata: { email: customer.email, name: customer.name },
     });
 
     return customer;
@@ -95,7 +105,7 @@ export class CustomersService {
     return customer;
   }
 
-  async update(id: string, updateCustomerDto: UpdateCustomerDto, userRole: UserRole) {
+  async update(id: string, updateCustomerDto: UpdateCustomerDto, userRole: UserRole, userId: string) {
     const customer = await this.findOne(id);
 
     // Check for email conflicts
@@ -125,10 +135,26 @@ export class CustomersService {
       data: updateCustomerDto,
     });
 
+    // Audit: customer.updated
+    await this.audit.log({
+      actorId: userId,
+      action: 'customer.updated',
+      resource: `customer:${id}`,
+      metadata: { changes: updateCustomerDto },
+    });
+
+    // Notify managers about customer update (simple broadcast to all managers)
+    const managers = await this.prisma.user.findMany({ where: { role: 'MANAGER' } });
+    await Promise.all(
+      managers.map((m) =>
+        this.notification.notifyCustomerUpdated(m.id, id, updatedCustomer.name),
+      ),
+    );
+
     return updatedCustomer;
   }
 
-  async remove(id: string, userRole: UserRole) {
+  async remove(id: string, userRole: UserRole, userId: string) {
     const customer = await this.findOne(id);
 
     // Only managers can delete customers
@@ -144,10 +170,18 @@ export class CustomersService {
       },
     });
 
+    // Audit: customer.deleted
+    await this.audit.log({
+      actorId: userId,
+      action: 'customer.deleted',
+      resource: `customer:${id}`,
+      metadata: { name: customer.name, email: customer.email },
+    });
+
     return deletedCustomer;
   }
 
-  async merge(sourceId: string, targetId: string, userRole: UserRole) {
+  async merge(sourceId: string, targetId: string, userRole: UserRole, userId: string) {
     // Only managers can merge customers
     if (userRole !== 'MANAGER') {
       throw new ForbiddenException('Only managers can merge customers');
@@ -170,6 +204,18 @@ export class CustomersService {
     await this.prisma.customer.update({
       where: { id: sourceId },
       data: { deletedAt: new Date() },
+    });
+
+    // Audit: customer.merged
+    await this.audit.log({
+      actorId: userId,
+      action: 'customer.merged',
+      resource: `customer:${sourceId}`,
+      metadata: { 
+        sourceCustomer: sourceCustomer.name, 
+        targetCustomer: targetCustomer.name,
+        targetId: targetId 
+      },
     });
 
     return {

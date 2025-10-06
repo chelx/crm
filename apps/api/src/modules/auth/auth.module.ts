@@ -8,10 +8,14 @@ import { JwtStrategy } from './strategies/jwt.strategy';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from '@/core/guards/roles.guard';
 import { InfraModule } from '@/infra/infra.module';
+import { AuditModule } from '@/modules/audit/audit.module';
+import { SecurityModule } from '@/modules/security/security.module';
 
 @Module({
   imports: [
     InfraModule,
+    AuditModule,
+    SecurityModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

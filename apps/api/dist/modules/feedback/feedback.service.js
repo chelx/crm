@@ -12,9 +12,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.FeedbackService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../infra/prisma/prisma.service");
+const audit_service_1 = require("../audit/audit.service");
 let FeedbackService = class FeedbackService {
-    constructor(prisma) {
+    constructor(prisma, audit) {
         this.prisma = prisma;
+        this.audit = audit;
     }
     async create(createFeedbackDto, userId) {
         const customer = await this.prisma.customer.findFirst({
@@ -44,6 +46,15 @@ let FeedbackService = class FeedbackService {
                     orderBy: { createdAt: 'desc' },
                     take: 1,
                 },
+            },
+        });
+        await this.audit.log({
+            actorId: userId,
+            action: 'feedback.created',
+            resource: `feedback:${feedback.id}`,
+            metadata: {
+                customerId: createFeedbackDto.customerId,
+                channel: createFeedbackDto.channel
             },
         });
         return feedback;
@@ -156,6 +167,6 @@ let FeedbackService = class FeedbackService {
 exports.FeedbackService = FeedbackService;
 exports.FeedbackService = FeedbackService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, audit_service_1.AuditService])
 ], FeedbackService);
 //# sourceMappingURL=feedback.service.js.map

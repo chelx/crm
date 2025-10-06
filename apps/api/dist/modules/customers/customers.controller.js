@@ -11,7 +11,6 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CustomersController = void 0;
 const common_1 = require("@nestjs/common");
@@ -37,13 +36,13 @@ let CustomersController = class CustomersController {
         return this.customersService.findOne(id);
     }
     async update(id, updateCustomerDto, user) {
-        return this.customersService.update(id, updateCustomerDto, user.role);
+        return this.customersService.update(id, updateCustomerDto, user.role, user.id);
     }
     async remove(id, user) {
-        return this.customersService.remove(id, user.role);
+        return this.customersService.remove(id, user.role, user.id);
     }
     async merge(sourceId, targetId, user) {
-        return this.customersService.merge(sourceId, targetId, user.role);
+        return this.customersService.merge(sourceId, targetId, user.role, user.id);
     }
 };
 exports.CustomersController = CustomersController;
@@ -58,7 +57,7 @@ __decorate([
     __param(0, (0, common_1.Body)()),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [customer_dto_1.CreateCustomerDto, typeof (_a = typeof client_1.User !== "undefined" && client_1.User) === "function" ? _a : Object]),
+    __metadata("design:paramtypes", [customer_dto_1.CreateCustomerDto, Object]),
     __metadata("design:returntype", Promise)
 ], CustomersController.prototype, "create", null);
 __decorate([
@@ -99,7 +98,7 @@ __decorate([
     __param(1, (0, common_1.Body)()),
     __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, customer_dto_1.UpdateCustomerDto, typeof (_b = typeof client_1.User !== "undefined" && client_1.User) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [String, customer_dto_1.UpdateCustomerDto, Object]),
     __metadata("design:returntype", Promise)
 ], CustomersController.prototype, "update", null);
 __decorate([
@@ -114,7 +113,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_c = typeof client_1.User !== "undefined" && client_1.User) === "function" ? _c : Object]),
+    __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], CustomersController.prototype, "remove", null);
 __decorate([
@@ -132,7 +131,7 @@ __decorate([
     __param(1, (0, common_1.Param)('targetId')),
     __param(2, (0, current_user_decorator_1.CurrentUser)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, typeof (_d = typeof client_1.User !== "undefined" && client_1.User) === "function" ? _d : Object]),
+    __metadata("design:paramtypes", [String, String, Object]),
     __metadata("design:returntype", Promise)
 ], CustomersController.prototype, "merge", null);
 exports.CustomersController = CustomersController = __decorate([

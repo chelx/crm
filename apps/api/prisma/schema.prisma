@@ -22,6 +22,13 @@ enum ReplyStatus {
   REJECTED
 }
 
+enum NotificationStatus {
+  PENDING
+  DELIVERED
+  FAILED
+  READ
+}
+
 model User {
   id           String   @id @default(cuid())
   email        String   @unique
@@ -33,6 +40,7 @@ model User {
   // Relations
   refreshTokens RefreshToken[]
   auditLogs     AuditLog[]
+  notifications Notification[]
 
   @@map("users")
 }
@@ -119,4 +127,24 @@ model AuditLog {
   @@map("audit_logs")
   @@index([actorId, createdAt])
   @@index([resource, createdAt])
+}
+
+model Notification {
+  id          String             @id @default(cuid())
+  userId      String             @map("user_id")
+  type        String
+  title       String
+  message     String
+  payload     Json?
+  status      NotificationStatus @default(PENDING)
+  createdAt   DateTime           @default(now()) @map("created_at")
+  deliveredAt DateTime?          @map("delivered_at")
+  readAt      DateTime?          @map("read_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+  @@index([userId, status])
+  @@index([userId, createdAt])
 }

@@ -17,11 +17,15 @@ const crypto_1 = require("crypto");
 const util_1 = require("util");
 const scryptAsync = (0, util_1.promisify)(crypto_1.scrypt);
 const prisma_service_1 = require("../../infra/prisma/prisma.service");
+const audit_service_1 = require("../audit/audit.service");
+const brute_force_detection_service_1 = require("../security/brute-force-detection.service");
 let AuthService = class AuthService {
-    constructor(prisma, jwtService, configService) {
+    constructor(prisma, jwtService, configService, audit, bruteForceDetection) {
         this.prisma = prisma;
         this.jwtService = jwtService;
         this.configService = configService;
+        this.audit = audit;
+        this.bruteForceDetection = bruteForceDetection;
     }
     async validateUser(email, password) {
         const user = await this.prisma.user.findUnique({
@@ -37,11 +41,18 @@ let AuthService = class AuthService {
         const { password: _, ...result } = user;
         return result;
     }
-    async login(loginDto) {
+    async login(loginDto, clientIp) {
+        const isBlocked = await this.bruteForceDetection.isBlocked(loginDto.email, clientIp || 'unknown');
+        if (isBlocked) {
+            throw new common_1.HttpException('Too many failed login attempts. Please try again later.', common_1.HttpStatus.TOO_MANY_REQUESTS);
+        }
         const user = await this.validateUser(loginDto.email, loginDto.password);
         if (!user) {
+            await this.bruteForceDetection.recordLoginAttempt(loginDto.email, clientIp || 'unknown', false);
+            await this.audit.logAnonymous('auth.login.failed', 'auth', { email: loginDto.email, ip: clientIp });
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
+        await this.bruteForceDetection.recordLoginAttempt(loginDto.email, clientIp || 'unknown', true);
         const payload = {
             sub: user.id,
             email: user.email,
@@ -49,7 +60,7 @@ let AuthService = class AuthService {
         };
         const accessToken = this.jwtService.sign(payload);
         const refreshToken = await this.generateRefreshToken(user.id);
-        return {
+        const response = {
             accessToken,
             refreshToken,
             user: {
@@ -58,6 +69,13 @@ let AuthService = class AuthService {
                 role: user.role,
             },
         };
+        await this.audit.log({
+            actorId: user.id,
+            action: 'auth.login.success',
+            resource: 'auth',
+            metadata: { ip: clientIp },
+        });
+        return response;
     }
     async register(registerDto) {
         const existingUser = await this.prisma.user.findUnique({
@@ -93,6 +111,7 @@ let AuthService = class AuthService {
             },
         });
         if (!refreshTokenRecord) {
+            await this.audit.logAnonymous('auth.refresh.failed', 'auth');
             throw new common_1.UnauthorizedException('Invalid refresh token');
         }
         if (refreshTokenRecord.rotatedAt) {
@@ -104,10 +123,17 @@ let AuthService = class AuthService {
             role: refreshTokenRecord.user.role,
         };
         const newAccessToken = this.jwtService.sign(payload);
-        await this.rotateRefreshToken(refreshTokenRecord.id, refreshTokenRecord.user.id);
-        return {
+        const newRefreshToken = await this.rotateRefreshToken(refreshTokenRecord.id, refreshTokenRecord.user.id);
+        const response = {
             accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
         };
+        await this.audit.log({
+            actorId: refreshTokenRecord.user.id,
+            action: 'auth.refresh.success',
+            resource: 'auth',
+        });
+        return response;
     }
     async logout(userId, refreshToken) {
         if (refreshToken) {
@@ -126,6 +152,11 @@ let AuthService = class AuthService {
                 where: { userId },
             });
         }
+        await this.audit.log({
+            actorId: userId,
+            action: 'auth.logout',
+            resource: 'auth',
+        });
     }
     async generateRefreshToken(userId) {
         const refreshToken = (0, crypto_1.randomBytes)(32).toString('hex');
@@ -177,6 +208,8 @@ exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         jwt_1.JwtService,
-        config_1.ConfigService])
+        config_1.ConfigService,
+        audit_service_1.AuditService,
+        brute_force_detection_service_1.BruteForceDetectionService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

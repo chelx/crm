@@ -31,6 +31,21 @@ export class AuditService {
     }
   }
 
+  async logAnonymous(action: string, resource: string, metadata?: any) {
+    try {
+      await this.prisma.auditLog.create({
+        data: {
+          actorId: 'anonymous',
+          action,
+          resource,
+          metadata: metadata || {},
+        },
+      });
+    } catch (error) {
+      this.logger.error('Failed to create anonymous audit log', error);
+    }
+  }
+
   async findAll(queryDto: AuditQueryDto) {
     const { actorId, action, resource, from, to, page = 1, limit = 20 } = queryDto;
     const skip = (page - 1) * limit;

@@ -5,6 +5,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Req,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
@@ -13,6 +14,7 @@ import { LoginResponse, RefreshTokenResponse } from '@/shared/types/auth.types';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from '@/shared/decorators/current-user.decorator';
 import { AuthenticatedUser } from '@/shared/types/auth.types';
+import { Request } from 'express';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -24,8 +26,10 @@ export class AuthController {
   @ApiOperation({ summary: 'User login' })
   @ApiResponse({ status: 200, description: 'Login successful' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
-  async login(@Body() loginDto: LoginDto): Promise<LoginResponse> {
-    return this.authService.login(loginDto);
+  @ApiResponse({ status: 429, description: 'Too many failed attempts' })
+  async login(@Body() loginDto: LoginDto, @Req() req: Request): Promise<LoginResponse> {
+    const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+    return this.authService.login(loginDto, clientIp);
   }
 
   @Post('register')

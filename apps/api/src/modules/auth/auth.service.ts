@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { scrypt, randomBytes, createHash } from 'crypto';
@@ -6,6 +6,8 @@ import { promisify } from 'util';
 
 const scryptAsync = promisify(scrypt);
 import { PrismaService } from '@/infra/prisma/prisma.service';
+import { AuditService } from '@/modules/audit/audit.service';
+import { BruteForceDetectionService } from '@/modules/security/brute-force-detection.service';
 import { LoginDto, RegisterDto, RefreshTokenDto } from './dtos/auth.dto';
 import { LoginResponse, RefreshTokenResponse, JwtPayload } from '@/shared/types/auth.types';
 
@@ -15,6 +17,8 @@ export class AuthService {
     private prisma: PrismaService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private audit: AuditService,
+    private bruteForceDetection: BruteForceDetectionService,
   ) {}
 
   async validateUser(email: string, password: string) {
@@ -35,12 +39,25 @@ export class AuthService {
     return result;
   }
 
-  async login(loginDto: LoginDto): Promise<LoginResponse> {
+  async login(loginDto: LoginDto, clientIp?: string): Promise<LoginResponse> {
+    // Check brute force protection
+    const isBlocked = await this.bruteForceDetection.isBlocked(loginDto.email, clientIp || 'unknown');
+    if (isBlocked) {
+      throw new HttpException('Too many failed login attempts. Please try again later.', HttpStatus.TOO_MANY_REQUESTS);
+    }
+
     const user = await this.validateUser(loginDto.email, loginDto.password);
     
     if (!user) {
+      // Record failed attempt
+      await this.bruteForceDetection.recordLoginAttempt(loginDto.email, clientIp || 'unknown', false);
+      // audit login failed (unknown user)
+      await this.audit.logAnonymous('auth.login.failed', 'auth', { email: loginDto.email, ip: clientIp });
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    // Record successful attempt
+    await this.bruteForceDetection.recordLoginAttempt(loginDto.email, clientIp || 'unknown', true);
 
     const payload: JwtPayload = {
       sub: user.id,
@@ -51,7 +68,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
     const refreshToken = await this.generateRefreshToken(user.id);
 
-    return {
+    const response = {
       accessToken,
       refreshToken,
       user: {
@@ -60,6 +77,16 @@ export class AuthService {
         role: user.role,
       },
     };
+
+    // audit login success
+    await this.audit.log({
+      actorId: user.id,
+      action: 'auth.login.success',
+      resource: 'auth',
+      metadata: { ip: clientIp },
+    });
+
+    return response;
   }
 
   async register(registerDto: RegisterDto) {
@@ -103,6 +130,7 @@ export class AuthService {
     });
 
     if (!refreshTokenRecord) {
+      await this.audit.logAnonymous('auth.refresh.failed', 'auth');
       throw new UnauthorizedException('Invalid refresh token');
     }
 
@@ -119,12 +147,21 @@ export class AuthService {
 
     const newAccessToken = this.jwtService.sign(payload);
 
-    // Rotate refresh token
-    await this.rotateRefreshToken(refreshTokenRecord.id, refreshTokenRecord.user.id);
+    // Rotate refresh token and get new refresh token
+    const newRefreshToken = await this.rotateRefreshToken(refreshTokenRecord.id, refreshTokenRecord.user.id);
 
-    return {
+    const response = {
       accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
     };
+
+    await this.audit.log({
+      actorId: refreshTokenRecord.user.id,
+      action: 'auth.refresh.success',
+      resource: 'auth',
+    });
+
+    return response;
   }
 
   async logout(userId: string, refreshToken?: string) {
@@ -145,6 +182,12 @@ export class AuthService {
         where: { userId },
       });
     }
+
+    await this.audit.log({
+      actorId: userId,
+      action: 'auth.logout',
+      resource: 'auth',
+    });
   }
 
   private async generateRefreshToken(userId: string): Promise<string> {

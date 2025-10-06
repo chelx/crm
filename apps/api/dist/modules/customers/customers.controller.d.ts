@@ -5,26 +5,26 @@ export declare class CustomersController {
     private readonly customersService;
     constructor(customersService: CustomersService);
     create(createCustomerDto: CreateCustomerDto, user: User): Promise<{
-        name: string;
-        tags: string[];
         id: string;
+        name: string;
         email: string;
-        createdAt: Date;
-        updatedAt: Date;
         phone: string | null;
         address: string | null;
+        tags: string[];
+        createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
     }>;
     findAll(queryDto: CustomerQueryDto): Promise<{
         data: {
-            name: string;
-            tags: string[];
             id: string;
+            name: string;
             email: string;
-            createdAt: Date;
-            updatedAt: Date;
             phone: string | null;
             address: string | null;
+            tags: string[];
+            createdAt: Date;
+            updatedAt: Date;
             deletedAt: Date | null;
         }[];
         meta: {
@@ -35,36 +35,36 @@ export declare class CustomersController {
         };
     }>;
     findOne(id: string): Promise<{
-        name: string;
-        tags: string[];
         id: string;
+        name: string;
         email: string;
-        createdAt: Date;
-        updatedAt: Date;
         phone: string | null;
         address: string | null;
+        tags: string[];
+        createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
     }>;
     update(id: string, updateCustomerDto: UpdateCustomerDto, user: User): Promise<{
-        name: string;
-        tags: string[];
         id: string;
+        name: string;
         email: string;
-        createdAt: Date;
-        updatedAt: Date;
         phone: string | null;
         address: string | null;
+        tags: string[];
+        createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
     }>;
     remove(id: string, user: User): Promise<{
-        name: string;
-        tags: string[];
         id: string;
+        name: string;
         email: string;
-        createdAt: Date;
-        updatedAt: Date;
         phone: string | null;
         address: string | null;
+        tags: string[];
+        createdAt: Date;
+        updatedAt: Date;
         deletedAt: Date | null;
     }>;
     merge(sourceId: string, targetId: string, user: User): Promise<{
